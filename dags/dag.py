@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-import subprocess
 
 def ejecutar_etl():
-    subprocess.run(["/app/venv/bin/python", "/shared/script/main_script.py"], check=True)
+     with open('/app/script/main_script.py') as f:
+        code = f.read()
+        exec(code)
+
 
 default_args = {'owner': 'cristobalqv',
                 'retries': 5,

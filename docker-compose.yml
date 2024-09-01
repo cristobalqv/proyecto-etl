@@ -17,27 +17,17 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: 10
-    PYTHONPATH: /opt/airflow/app:${PYTHONPATH}
-    VIRTUAL_ENV: /app/venv  # Añadir variable para el entorno virtual
-    PATH: /app/venv/bin:$PATH  # Asegurar que el entorno virtual esté en el PATH
  
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ./config:/opt/airflow/config
-    - ./modulos:/shared/modulos
-    - ./script:/shared/script
-    - ./env:/shared/app
-    - ./venv:/app/venv  # Compartir el entorno virtual
 
-  entrypoint: /bin/bash -c "source /app/venv/bin/activate && airflow webserver"
-
-  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     postgres:
       condition: service_healthy
-
 
 
 services:
@@ -59,17 +49,12 @@ services:
 
 
   python-container:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: etlpython
-    volumes:
-      - ./modulos:/shared/modulos
-      - ./script:/shared/script
-      - ./env:/shared/app
-      - ./venv:/app/venv
     env_file:
       - .env
+    #este comando mantiene en espera al contenedor que se vaya a crear, 
+    #esperando una instrucción de ejecución desde un objeto pythonoperator en el dag 
     command: tail -f /dev/null
 
 
